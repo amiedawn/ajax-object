@@ -1,61 +1,50 @@
-const formEl = document.querySelector("#input-form"); // can submit by clicking on button or hitting enter
+const containerEl = document.querySelector("#container");
+const tableEl = document.querySelector("#myTable");
 
-function addRecord(event) {
-  event.preventDefault();
+function loadDoc() {
+  // AJAX call
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "todo.json", true);
 
-  let parentFirstName = document.getElementById("parent-first-name").value;
-  let parentLastName = document.getElementById("parent-last-name").value;
-  let email = document.getElementById("email").value;
-  let childName = document.getElementById("child-name").value;
-  let grade = document.getElementById("grade").value;
-  let tableHeader = document.getElementById("table-header");
+  xhr.onreadystatechange = function () {
+    if (this.readyState ===4 && this.status == 200) {
+      let countries = JSON.parse(this.response);
+      // alert(countries[0].text);
+      // console.log(countries);
 
-  class Parent {
-    constructor(parentFirstName, parentLastName, email, childName, grade) {
-      this.parentFirstName = parentFirstName;
-      this.parentLastName = parentLastName;
-      this.email = email;
-      this.childName = childName;
-      this.grade = grade;
+      let table = document.createElement("table");
+      table.setAttribute("class", "info");
+      let properties = ["id", "text", "created_at", "Tags", "is_complete"];
+
+      var capitalize = function (titles) {
+        return titles.charAt(0).toUpperCase() + titles.slice(1);
+      };
+
+      let tr = document.createElement("tr");
+      for (let i = 0; i < properties.length; i++) {
+        let th = document.createElement("th");
+        th.className = "titles";
+        th.appendChild(document.createTextNode(capitalize(properties[i])));
+        tr.appendChild(th);
+      }
+      table.appendChild(tr);
+      let row;
+    
+      for (let j = 0; j < countries.length; j++) {
+        tr = document.createElement("tr");
+        row = countries[j];
+        for (let k = 0; k < properties.length; k++) {
+          let td = document.createElement("td");
+          td.appendChild(document.createTextNode(row[properties[k]]));
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+      document.getElementById("myTable").appendChild(table);
     }
-    getInfo() {
-      return (
-        this.parentFirstName,
-        this.parentLastName,
-        this.email,
-        this.childName,
-        this.grade
-      );
-    }
-  }
+  };
+  
+  xhr.send();
+};
 
-  // extra instances of the object
-  const parentObj = new Parent(
-    parentFirstName,
-    parentLastName,
-    email,
-    childName,
-    grade
-  );
-  parentObj.getInfo();
-
-  let table = tableHeader.insertRow(tableHeader.length);
-  let cell1 = table.insertCell(0);
-  cell1.innerHTML = parentObj.parentFirstName;
-  let cell2 = table.insertCell(1);
-  cell2.innerHTML = parentObj.parentLastName;
-  let cell3 = table.insertCell(2);
-  cell3.innerHTML = parentObj.email;
-  let cell4 = table.insertCell(3);
-  cell4.innerHTML = parentObj.childName;
-  let cell5 = table.insertCell(4);
-  cell5.innerHTML = parentObj.grade;
-  let cell6 = table.insertCell(5);
-  cell6.innerHTML =
-    "<input type='button' value='Edit' onclick='editRow(this)' />";
-  let cell7 = table.insertCell(6);
-  cell7.innerHTML =
-    "<input type='button' value='Delete' onclick='deleteRow()' />";
-}
-
-formEl.addEventListener("submit", addRecord); // instead of "click" so can hit enter to submit also
+loadDoc();
